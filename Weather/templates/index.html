@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        input { padding: 8px; margin: 10px; }
+        button { padding: 8px; cursor: pointer; }
+        .weather-container { margin-top: 20px; }
+        .forecast { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+        .forecast div { padding: 10px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>Weather Dashboard</h1>
+    <input type="text" id="city" placeholder="Enter city name">
+    <button onclick="getWeather()">Get Weather</button>
+    <div id="weather" class="weather-container"></div>
+    <div id="forecast" class="forecast"></div>
+    
+    <script>
+        function getWeather() {
+            const city = document.getElementById('city').value;
+            fetch('/weather', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `city=${city}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('weather').innerHTML = `<p>${data.error}</p>`;
+                    return;
+                }
+                document.getElementById('weather').innerHTML = `
+                    <h2>${data.current.city}</h2>
+                    <p>Temperature: ${data.current.temperature}°C</p>
+                    <p>Description: ${data.current.description}</p>
+                    <p>Humidity: ${data.current.humidity}%</p>
+                `;
+                
+                let forecastHTML = '';
+                data.forecast.forEach(f => {
+                    forecastHTML += `
+                        <div>
+                            <p>${f.date}</p>
+                            <p>${f.temperature}°C</p>
+                            <p>${f.description}</p>
+                        </div>
+                    `;
+                });
+                document.getElementById('forecast').innerHTML = forecastHTML;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
